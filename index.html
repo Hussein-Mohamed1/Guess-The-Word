@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <h1>Guess The Word</h1>
+    <div class="guess-game">
+        <div class="game-area">
+            <div class="inputs"></div>
+            <div class="control">
+                <button class="check">Check Word</button>
+                <button class="hint"><span></span> Hints</button>
+            </div>
+            <div class="overlay" id="gameOverlay">
+                <div class="message-box">
+                    <h2 id="overlayTitle"></h2>
+                    <p id="overlayMessage"></p>
+                    <div class="buttons">
+                        <button class="end-game" id="endGameBtn">End Game</button>
+                        <button id="anotherWordBtn">Another Word</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="key-colors">
+            <h2>Key Colors</h2>
+            <div class="key-color">
+                <div class="key in-place"></div>
+                <div class="key-text">Letter Is Correct and In Place</div>
+            </div>
+            <div class="key-color">
+                <div class="key not-in-place"></div>
+                <div class="key-text">Letter Is Correct But Not In Place</div>
+            </div>
+            <div class="key-color">
+                <div class="key no"></div>
+                <div class="key-text">Letter Is Wrong</div>
+            </div>
+        </div>
+    </div>
+    <footer>Guess The word Game created By Hussein</footer>
+    <script src="Guess.js"></script>
+</body>
+
+</html>
