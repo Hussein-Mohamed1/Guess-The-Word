@@ -4,16 +4,26 @@ let wordToGuess;
 let tries;
 let numberofLetters
 let rightword;
+let numberofHints;
+let spanHint = document.querySelector('.hint span');
 fetch('https://random-word-api.herokuapp.com/word?number=1000').then(repons => repons.json()).then(obj => {
     words = Array.from(obj);
     currentTry = 1;
     wordToGuess = "";
     rightword = words[Math.floor(Math.random() * words.length)].toLowerCase();
     wordToGuess = rightword.split('');
-    if (wordToGuess.length > 8)
+    if (wordToGuess.length > 6)
         tries = 8;
     else
         tries = 6;
+    if(wordToGuess.length < 5) {
+        numberofHints = 2;
+    } else if (wordToGuess.length < 9) {
+        numberofHints = 3;
+    } else {
+        numberofHints = 5;
+    }
+    spanHint.textContent = numberofHints;
     numberofLetters = wordToGuess.length;
     generateInput();
 }).catch(err => {
@@ -168,9 +178,7 @@ window.location.reload();
 });
 
 // handel hints 
-let numberofHints = 2;
-let spanHint = document.querySelector('.hint span');
-spanHint.textContent = numberofHints;
+
 
 hint.addEventListener('click', () => {
 
