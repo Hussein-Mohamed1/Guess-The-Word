@@ -6,29 +6,93 @@ let numberofLetters
 let rightword;
 let numberofHints;
 let spanHint = document.querySelector('.hint span');
-fetch('https://random-word-api.herokuapp.com/word?number=1000').then(repons => repons.json()).then(obj => {
-    words = Array.from(obj);
-    currentTry = 1;
-    wordToGuess = "";
-    rightword = words[Math.floor(Math.random() * words.length)].toLowerCase();
-    wordToGuess = rightword.split('');
-    if (wordToGuess.length > 6)
-        tries = 8;
-    else
-        tries = 6;
-    if(wordToGuess.length < 5) {
-        numberofHints = 2;
-    } else if (wordToGuess.length < 9) {
-        numberofHints = 3;
-    } else {
-        numberofHints = 5;
+// Function to fetch words from a given endpoint
+const fetchWordsFromEndpoint = (endpoint) => {
+    return fetch(`https://api.datamuse.com${endpoint}`)
+        .then(response => response.json())
+        .then(data => data.map(item => item.word.toLowerCase()))
+        .catch(error => {
+            console.error(`There was a problem with the fetch operation for ${endpoint}:`, error);
+            return [];
+        });
+};
+
+// Fetch words from both endpoints
+const getWords = async () => {
+    try {
+        // Define the endpoints
+        const endpoints = ['/words?rel_jja=yellow',
+            '/words?rel_jjb=ocean',
+            '/words?rel_jjb=temperature',
+            '/words?rel_trg=cow',
+            '/words?lc=drink&sp=w*',
+            '/words?ml=ringing+in+the+ears',
+            '/words?ml=duck&sp=b*'
+        ];
+
+        // Fetch words from all endpoints
+        const promises = endpoints.map(endpoint => fetchWordsFromEndpoint(endpoint));
+        const results = await Promise.all(promises);
+
+        // Combine all word lists into one
+        let words = [].concat(...results);
+        words = [...new Set(words)]; // Remove duplicates if needed
+
+        currentTry = 1;
+        wordToGuess = "";
+        rightword = words[Math.floor(Math.random() * words.length)].toLowerCase();
+        while (rightword.length > 15 ) {
+            rightword = words[Math.floor(Math.random() * words.length)].toLowerCase();
+        }
+        wordToGuess = rightword.split('');
+        if (wordToGuess.length > 6)
+            tries = 8;
+        else
+            tries = 6;
+        if (wordToGuess.length < 5) {
+            numberofHints = 2;
+        } else if (wordToGuess.length < 9) {
+            numberofHints = 3;
+        } else {
+            numberofHints = 5;
+        }
+        spanHint.textContent = numberofHints;
+        numberofLetters = wordToGuess.length;
+        generateInput();
+
+    } catch (error) {
+        console.error('Error fetching words:', error);
     }
-    spanHint.textContent = numberofHints;
-    numberofLetters = wordToGuess.length;
-    generateInput();
-}).catch(err => {
-    console.log(`Error is ${err}`);
-})
+};
+
+// Call the function to get the words
+getWords();
+
+// fetch('https://api.datamuse.com/words?rel_jja=yellow').then(repons => repons.json()).then(obj => {
+//     let objects = Array.from(obj);
+//     words = objects.map(word => word.word.toLowerCase());
+//     console.log(words);
+//     currentTry = 1;
+//     wordToGuess = "";
+//     rightword = words[Math.floor(Math.random() * words.length)].toLowerCase();
+//     wordToGuess = rightword.split('');
+//     if (wordToGuess.length > 6)
+//         tries = 8;
+//     else
+//         tries = 6;
+//     if (wordToGuess.length < 5) {
+//         numberofHints = 2;
+//     } else if (wordToGuess.length < 9) {
+//         numberofHints = 3;
+//     } else {
+//         numberofHints = 5;
+//     }
+//     spanHint.textContent = numberofHints;
+//     numberofLetters = wordToGuess.length;
+//     generateInput();
+// }).catch(err => {
+//     console.log(`Error is ${err}`);
+// })
 // generate input 
 function generateInput() {
     let inputs = document.querySelector('.inputs');
@@ -108,19 +172,19 @@ function handelLogic() {
     }
     for (let i = 1; i <= numberofLetters; i++) {
         let curletter = document.querySelector(`#input-${currentTry}-letter-${i}`);
-        for(let j = 0 ; j < wordToGuess.length ; j++) {
-            if( i !== j + 1 && !curletter.classList.contains('yes-in-place') &&  curletter.value === wordToGuess[j]) {
-                let sameletter = document.querySelector(`#input-${currentTry}-letter-${j+1}`);
-                if(!sameletter.classList.contains('yes-in-place')) {
+        for (let j = 0; j < wordToGuess.length; j++) {
+            if (i !== j + 1 && !curletter.classList.contains('yes-in-place') && curletter.value === wordToGuess[j]) {
+                let sameletter = document.querySelector(`#input-${currentTry}-letter-${j + 1}`);
+                if (!sameletter.classList.contains('yes-in-place')) {
                     successGuess = false;
                     curletter.classList.add('not-in-place');
                 }
             }
         }
     }
-    for(let i =1 ; i<= numberofLetters ; i++) {
-        let curletter =  document.querySelector(`#input-${currentTry}-letter-${i}`);
-        if(!curletter.classList.contains('yes-in-place') && !curletter.classList.contains('not-in-place')) {
+    for (let i = 1; i <= numberofLetters; i++) {
+        let curletter = document.querySelector(`#input-${currentTry}-letter-${i}`);
+        if (!curletter.classList.contains('yes-in-place') && !curletter.classList.contains('not-in-place')) {
             successGuess = false;
             curletter.classList.add('no');
         }
@@ -174,27 +238,21 @@ endGame.addEventListener('click', () => {
 });
 
 anotherword.addEventListener('click', () => {
-window.location.reload();
+    window.location.reload();
 });
 
 // handel hints 
 
-
+let currenthint = 1;
 hint.addEventListener('click', () => {
 
     if (numberofHints > 0) {
         if (currentTry === 1) {
-            if (numberofHints === 2) {
-                document.querySelector('#input-1-letter-1').classList.add('yes-in-place');
-                document.querySelector('#input-1-letter-1').value = wordToGuess[0];
-                document.querySelector('#input-1-letter-1').disabled = true;
-                document.querySelector('#input-1-letter-2').focus();
-            } else {
-                document.querySelector('#input-1-letter-2').classList.add('yes-in-place');
-                document.querySelector('#input-1-letter-2').value = wordToGuess[1];
-                document.querySelector('#input-1-letter-2').disabled = true;
-                document.querySelector('#input-1-letter-3').focus();
-            }
+            document.querySelector(`#input-1-letter-${currenthint}`).classList.add('yes-in-place');
+            document.querySelector(`#input-1-letter-${currenthint}`).value = wordToGuess[currenthint - 1];
+            document.querySelector(`#input-1-letter-${currenthint}`).disabled = true;
+            document.querySelector(`#input-1-letter-${currenthint + 1}`).focus();
+            currenthint++;
         } else {
             let hintuse = false;
             let flag;
@@ -231,7 +289,7 @@ hint.addEventListener('click', () => {
 
 function handelbackspace(e) {
     if (e.key === 'Backspace') {
-        if(e.target.tagName === 'INPUT') {
+        if (e.target.tagName === 'INPUT') {
             e.target.value = '';
             if (e.target.previousSibling && !e.target.previousSibling.classList.contains('yes-in-place')) {
                 e.target.previousSibling.value = '';
@@ -242,5 +300,8 @@ function handelbackspace(e) {
 
 }
 document.addEventListener('keydown', handelbackspace);
+
+
+
 
 
